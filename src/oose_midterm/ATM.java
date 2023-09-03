@@ -5,15 +5,17 @@ import java.util.Scanner;
 
 public class ATM implements ATMAction {
 
-    private String atmName;
+    private final String atmName;
     private ArrayList<Account> user = new ArrayList<>();
     private Manager admin;
     private int numOfLogins = 0;
+    private double rate;
 
     public ATM(Bank detail) {
         this.atmName = detail.getBankName();
         this.user = detail.getUser();
         this.admin = detail.getAdmin();
+        this.rate = detail.getRate();
     }
 
     @Override
@@ -21,31 +23,60 @@ public class ATM implements ATMAction {
         System.out.println("*********************************");
         System.out.println("Username : " + accDetail.getUserName());
         System.out.println("Account name : " + accDetail.getFullName());
-        System.out.println("Account Balance " + accDetail.getCashBalance() + " bath");
+        System.out.println("Account Balance " + accDetail.getCashBalance() + " bath or " + accDetail.getCashBalance() / this.getRate() + " BTC");
     }
 
     @Override
-    public void withDrawable(Account accDetail, int cash) {
+    public void withDrawable(Account accDetail, int currency) {
+        Scanner userInput = new Scanner(System.in);
         System.out.println("*********************************");
         System.out.println("Username : " + accDetail.getUserName());
         System.out.println("Account name : " + accDetail.getFullName());
-        System.out.println("Account withdrawal " + cash + " bath");
-        if (cash > accDetail.getCashBalance() || cash < 0) {
-            System.err.println("Unable to withdraw money");
-            System.out.println("Account Balance " + accDetail.getCashBalance() + " bath");
+        if (currency == 1) {
+            System.out.println("Account can withdraw money " + accDetail.getCashBalance() + " bath");
+            try {
+                System.out.print("Enter the amount you want to withdraw : ");
+                double cash = userInput.nextDouble();
+                if (cash > accDetail.getCashBalance() || cash < 0) {
+                    System.err.println("Unable to withdraw money");
+                    System.out.println("Account Balance " + accDetail.getCashBalance() + " bath");
+                } else {
+                    accDetail.setCashBalance(accDetail.getCashBalance() - cash);
+                    System.out.println("Account Balance " + accDetail.getCashBalance() + " bath");
+                }
+                System.out.println("Account withdrawal " + cash + " bath");
+            } catch (java.util.InputMismatchException e) {
+                System.err.println("something went wrong!!!");
+                this.showServiceMenu(accDetail);
+            }
         } else {
-            accDetail.setCashBalance(accDetail.getCashBalance() - cash);
-            System.out.println("Account Balance " + accDetail.getCashBalance() + " bath");
+            double btc = accDetail.getCashBalance() / this.getRate();
+            System.out.println("Account can withdraw money " + btc + " BTC");
+            try {
+                System.out.print("Enter the amount you want to withdraw : ");
+                double cash = userInput.nextDouble();
+                if (cash > btc || cash < 0) {
+                    System.err.println("Unable to withdraw money");
+                    System.out.println("Account Balance " + btc + " BTC");
+                } else {
+                    accDetail.setCashBalance(accDetail.getCashBalance() - cash * this.getRate());
+                    System.out.println("Account Balance " + cash + " BTC");
+                }
+                System.out.println("Account withdrawal " + cash + " BTC");
+            } catch (java.util.InputMismatchException e) {
+                System.err.println("something went wrong!!!");
+                this.showServiceMenu(accDetail);
+            }
         }
     }
 
     @Override
-    public void depositeable(Account accDetail, int cash) {
+    public void depositeable(Account accDetail, double cash) {
         System.out.println("*********************************");
         System.out.println("Username : " + accDetail.getUserName());
         System.out.println("Account name : " + accDetail.getFullName());
         System.out.println("Account depositeable " + cash + " bath");
-        int balance = cash + accDetail.getCashBalance();
+        double balance = cash + accDetail.getCashBalance();
         if (balance > 1000000 || cash < 0) {
             System.err.println("Unable to deposit money");
             System.out.println("Account Balance " + accDetail.getCashBalance() + " bath");
@@ -56,11 +87,11 @@ public class ATM implements ATMAction {
     }
 
     @Override
-    public void transferable(Account source, String id, int cash) {
+    public void transferable(Account source, String id, double cash) {
         for (int i = 0; i < this.user.size(); i++) {
             if (id.equals(this.user.get(i).getIdCardNumber())) {
-                int sourceBalance = source.getCashBalance() - cash;
-                int destinationBalance = this.user.get(i).getCashBalance() + cash;
+                double sourceBalance = source.getCashBalance() - cash;
+                double destinationBalance = this.user.get(i).getCashBalance() + cash;
                 if (source.getIdCardNumber().equals(this.user.get(i).getIdCardNumber())) {
                     System.err.println("Unable to transfer money to the destination account.");
                     System.err.println("Because the destination and source accounts are the same account.");
@@ -148,7 +179,8 @@ public class ATM implements ATMAction {
             System.out.println("Menu Service");
             System.out.println("1. Add Account");
             System.out.println("2. Show all account");
-            System.out.println("3. Exit");
+            System.out.println("3. Show BTC Rate");
+            System.out.println("4. Exit");
             System.out.print("Choose : ");
             String choice = userInput.next();
             switch (choice) {
@@ -172,8 +204,12 @@ public class ATM implements ATMAction {
                         System.err.println("Please enter numerical data.");
                     }
                 }
-                case "3" ->
+                case "3" -> {
+                    this.showBTCRate();
+                }
+                case "4" -> {
                     this.login();
+                }
                 default ->
                     System.err.println("something went wrong!!!");
             }
@@ -191,7 +227,8 @@ public class ATM implements ATMAction {
             System.out.println("2. Withdraw money.");
             System.out.println("3. deposit money.");
             System.out.println("4. Transfer money.");
-            System.out.println("5. Log out.");
+            System.out.println("5. Show BTC Rate.");
+            System.out.println("6. Log out.");
             System.out.print("Choose : ");
             String choice = userInput.next();
             switch (choice) {
@@ -201,15 +238,29 @@ public class ATM implements ATMAction {
                     System.out.println("*********************************");
                     System.out.println("Username : " + accountDetail.getUserName());
                     System.out.println("Account name : " + accountDetail.getFullName());
-                    System.out.print("Enter the amount you want to withdraw : ");
-                    try {
-                        int cash = userInput.nextInt();
-                        this.withDrawable(accountDetail, cash);
-                    } catch (java.util.InputMismatchException e) {
-                        System.err.println("something went wrong!!!");
-                        this.showServiceMenu(accountDetail);
+                    while (true) {
+                        System.out.println("Choose the currency to withdraw :");
+                        System.out.println("1. THB");
+                        System.out.println("2. BTC");
+                        System.out.println("3. Cancel");
+                        System.out.print("Choose : ");
+                        choice = userInput.next();
+                        switch (choice) {
+                            case "1" -> {
+                                this.withDrawable(accountDetail, 1);
+                                this.showServiceMenu(accountDetail);
+                            }
+                            case "2" -> {
+                                this.withDrawable(accountDetail, 2);
+                                this.showServiceMenu(accountDetail);
+                            }
+                            case "3" -> {
+                                this.showServiceMenu(accountDetail);
+                            }
+                            default ->
+                                System.out.println("Select \"1\", \"2\" or \"3\" again:");
+                        }
                     }
-
                 }
                 case "3" -> {
                     System.out.println("*********************************");
@@ -217,7 +268,7 @@ public class ATM implements ATMAction {
                     System.out.println("Account name : " + accountDetail.getFullName());
                     System.out.print("Enter the amount you wish to deposit : ");
                     try {
-                        int cash = userInput.nextInt();
+                        double cash = userInput.nextDouble();
                         this.depositeable(accountDetail, cash);
                     } catch (java.util.InputMismatchException e) {
                         System.err.println("something went wrong!!!");
@@ -231,10 +282,13 @@ public class ATM implements ATMAction {
                     System.out.print("Enter recipient account id : ");
                     String destination = userInput.next();
                     System.out.print("Enter the amount you want to transfer : ");
-                    int cash = userInput.nextInt();
+                    double cash = userInput.nextDouble();
                     this.transferable(accountDetail, destination, cash);
                 }
                 case "5" -> {
+                    this.showBTCRate();
+                }
+                case "6" -> {
                     this.login();
                 }
                 default -> {
@@ -243,6 +297,12 @@ public class ATM implements ATMAction {
                 }
             }
         }
+    }
+
+    private void showBTCRate() {
+        System.out.println("*********************************");
+        System.out.println("BTC rate 1 BTC = " + this.getRate() + " bath.");
+        System.out.println("*********************************");
     }
 
     private void showDetail(int index) {
@@ -278,4 +338,7 @@ public class ATM implements ATMAction {
         this.admin = admin;
     }
 
+    public double getRate() {
+        return this.rate;
+    }
 }

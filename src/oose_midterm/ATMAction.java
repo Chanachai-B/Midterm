@@ -4,9 +4,9 @@ public interface ATMAction {
 
     void checkable(Account accDetail);
 
-    void withDrawable(Account accDetail, int cash);
+    void withDrawable(Account accDetail, int currency);
 
-    void depositeable(Account accDetail, int cash);
+    void depositeable(Account accDetail, double cash);
 
-    void transferable(Account source, String id, int cash);
+    void transferable(Account source, String id, double cash);
 }

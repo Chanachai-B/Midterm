@@ -4,9 +4,9 @@ public class Account extends Person {
 
     private String userName;
     private String password;
-    private int cashBalance;
+    private double cashBalance;
 
-    public Account(String userName, String password, String firstName, String lastName, String gender, String idCardNumber, int cash) {
+    public Account(String userName, String password, String firstName, String lastName, String gender, String idCardNumber, double cash) {
         super.setIdCardNumber(idCardNumber);
         super.setFirstName(firstName);
         super.setLastName(lastName);
@@ -25,11 +25,11 @@ public class Account extends Person {
         return this.password;
     }
 
-    public int getCashBalance() {
+    public double getCashBalance() {
         return this.cashBalance;
     }
 
-    public void setCashBalance(int cash) {
+    public void setCashBalance(double cash) {
         this.cashBalance = cash;
     }
 

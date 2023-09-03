@@ -5,14 +5,16 @@ import java.util.Scanner;
 
 public class Bank {
 
-    private String bankName;
+    private final String bankName;
     private ArrayList<Account> user = new ArrayList<>();
     private Manager admin;
+    private double rate;
 
     public Bank(String name) {
         this.bankName = name;
         System.out.println("*********************************");
         System.out.println("Welcome to " + this.bankName + " Management System");
+        this.setRate();
         this.addAdmin();
     }
 
@@ -22,20 +24,38 @@ public class Bank {
         this.admin = atm.getAdmin();
     }
 
-    private void addAdmin() {
-        System.out.println("*********************************");
-        System.out.println("First, set up an admin account.");
-        System.out.println("Enter the details of admin account");
-        ArrayList<Object> list = this.addDetail(true);
+    private void setRate() {
+        Scanner userInput = new Scanner(System.in);
+        System.out.print("Please enter BTC rate => ");
         while (true) {
-            if (list != null) {
-                this.admin = new Manager((String) list.get(0), (String) list.get(1), (String) list.get(2), (String) list.get(3), (String) list.get(4), (String) list.get(5));
-                System.out.println("successfully added information");
+            try {
+                this.rate = userInput.nextDouble();
                 break;
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter numeric input");
             }
-            list = this.addDetail(true);
         }
 
+    }
+
+    private void addAdmin() {
+//        System.out.println("*********************************");
+//        System.out.println("First, set up an admin account.");
+//        System.out.println("Enter the details of admin account");
+//        ArrayList<Object> list = this.addDetail(true);
+//        while (true) {
+//            if (list != null) {
+//                this.admin = new Manager((String) list.get(0), (String) list.get(1), (String) list.get(2), (String) list.get(3), (String) list.get(4), (String) list.get(5));
+//                System.out.println("successfully added information");
+//                break;
+//            }
+//            list = this.addDetail(true);
+//        }
+        ArrayList<Object> list = this.add();
+        this.admin = new Manager((String) list.get(0), (String) list.get(1), (String) list.get(2), (String) list.get(3), (String) list.get(4), (String) list.get(5));
+        list.clear();
+        list = this.adduser();
+        this.user.add(new Account((String) list.get(0), (String) list.get(1), (String) list.get(2), (String) list.get(3), (String) list.get(4), (String) list.get(5), (Integer) list.get(6)));
         ATM atm = new ATM(this);
         atm.login();
     }
@@ -59,7 +79,7 @@ public class Bank {
                             i--;
                             continue;
                         }
-                        this.user.add(new Account((String) list.get(0), (String) list.get(1), (String) list.get(2), (String) list.get(3), (String) list.get(4), (String) list.get(5), (Integer) list.get(6)));
+                        this.user.add(new Account((String) list.get(0), (String) list.get(1), (String) list.get(2), (String) list.get(3), (String) list.get(4), (String) list.get(5), (double) list.get(6)));
                         System.out.println("successfully added information");
                     }
                     ATM atm = new ATM(this);
@@ -201,5 +221,32 @@ public class Bank {
 
     public Manager getAdmin() {
         return this.admin;
+    }
+
+    public double getRate() {
+        return this.rate;
+    }
+
+    public ArrayList add() {
+        ArrayList<Object> list = new ArrayList<>();
+        list.add("Admin");
+        list.add("1234");
+        list.add("C");
+        list.add("B");
+        list.add("Men");
+        list.add("116430462008-4");
+        return list;
+    }
+
+    public ArrayList adduser() {
+        ArrayList<Object> list = new ArrayList<>();
+        list.add("user");
+        list.add("1234");
+        list.add("C");
+        list.add("B");
+        list.add("Men");
+        list.add("1164304620084");
+        list.add(900000);
+        return list;
     }
 }
